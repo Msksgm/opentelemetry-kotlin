@@ -5,7 +5,7 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.aliases.OtelJavaResource
 import io.opentelemetry.kotlin.attributes.AttributesMutator
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
-import io.opentelemetry.kotlin.attributes.setAttributes
+import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.error.SdkErrorHandler
@@ -55,7 +55,7 @@ internal class CompatOpenTelemetryConfig(
     }
 
     override fun resource(map: Map<String, Any>) {
-        globalResourceAttrs.apply { setAttributes(map) }
+        globalResourceAttrs.apply { setTypedAttributes(map) }
     }
 
     internal fun buildGlobalResource(): Resource =

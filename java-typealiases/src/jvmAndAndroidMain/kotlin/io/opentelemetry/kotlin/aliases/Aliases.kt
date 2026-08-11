@@ -19,6 +19,9 @@ import io.opentelemetry.api.logs.Severity
 import io.opentelemetry.api.metrics.Meter
 import io.opentelemetry.api.metrics.MeterBuilder
 import io.opentelemetry.api.metrics.MeterProvider
+import io.opentelemetry.api.metrics.ObservableDoubleMeasurement
+import io.opentelemetry.api.metrics.ObservableLongMeasurement
+import io.opentelemetry.api.metrics.ObservableMeasurement
 import io.opentelemetry.api.trace.Span
 import io.opentelemetry.api.trace.SpanBuilder
 import io.opentelemetry.api.trace.SpanContext
@@ -131,6 +134,9 @@ typealias OtelJavaScopeConfigurator<T> = ScopeConfigurator<T>
 typealias OtelJavaMeterProvider = MeterProvider
 typealias OtelJavaMeterBuilder = MeterBuilder
 typealias OtelJavaMeter = Meter
+typealias OtelJavaObservableMeasurement = ObservableMeasurement
+typealias OtelJavaObservableLongMeasurement = ObservableLongMeasurement
+typealias OtelJavaObservableDoubleMeasurement = ObservableDoubleMeasurement
 typealias OtelJavaSdkMeterProvider = SdkMeterProvider
 typealias OtelJavaSdkMeterProviderBuilder = SdkMeterProviderBuilder
 typealias OtelJavaSdkTracerProvider = SdkTracerProvider

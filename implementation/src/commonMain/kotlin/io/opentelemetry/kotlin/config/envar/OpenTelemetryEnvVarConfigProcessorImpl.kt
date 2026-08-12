@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.config.envar
 import io.opentelemetry.kotlin.config.envar.logging.LogLimitEnvVarConfigProcessor
 import io.opentelemetry.kotlin.config.envar.model.EnvironmentConfiguration
 import io.opentelemetry.kotlin.config.envar.tracing.SpanLimitEnvVarConfigProcessor
+import io.opentelemetry.kotlin.getEnvVarValue
 import io.opentelemetry.kotlin.init.config.LoggingConfig
 import io.opentelemetry.kotlin.init.config.TracingConfig
 

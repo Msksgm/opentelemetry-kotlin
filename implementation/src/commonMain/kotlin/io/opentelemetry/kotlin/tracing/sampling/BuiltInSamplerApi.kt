@@ -2,6 +2,8 @@ package io.opentelemetry.kotlin.tracing.sampling
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigDsl
+import io.opentelemetry.kotlin.init.ComposableRuleBasedConfigImpl
 import io.opentelemetry.kotlin.init.SamplerConfigDsl
 
 /**
@@ -109,3 +111,14 @@ public fun SamplerConfigDsl.composableAnnotating(
     delegate: ComposableSampler,
     attributes: AttributesMutator.() -> Unit,
 ): ComposableSampler = ComposableAnnotatingSampler(delegate, attributes)
+
+/**
+ * A [ComposableSampler] that evaluates rules in the order they are declared, delegating to the
+ * first matching rule's sampler. Spans that match no rule are not sampled.
+ *
+ * https://opentelemetry.io/docs/specs/otel/trace/sdk/#composablerulebased
+ */
+@ExperimentalApi
+public fun SamplerConfigDsl.composableRuleBased(
+    block: ComposableRuleBasedConfigDsl.() -> Unit,
+): ComposableSampler = ComposableRuleBasedConfigImpl(this).apply(block).buildSampler()

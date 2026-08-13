@@ -13,7 +13,7 @@ internal object AlwaysOffSampler : Sampler {
 
     override fun shouldSample(
         context: Context,
-        traceId: String,
+        traceIdBytes: ByteArray,
         name: String,
         spanKind: SpanKind,
         attributes: AttributeContainer,

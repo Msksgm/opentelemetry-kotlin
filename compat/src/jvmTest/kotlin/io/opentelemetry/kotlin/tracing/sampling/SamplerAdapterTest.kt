@@ -11,6 +11,7 @@ import io.opentelemetry.kotlin.aliases.OtelJavaSpanKind
 import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.EmptyAttributeContainer
 import io.opentelemetry.kotlin.context.FakeContext
+import io.opentelemetry.kotlin.factory.hexToByteArray
 import io.opentelemetry.kotlin.tracing.SpanKind
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -45,7 +46,7 @@ internal class SamplerAdapterTest {
 
     private fun SamplerAdapter.sample(): SamplingResult = shouldSample(
         context = FakeContext(),
-        traceId = "000000000000000000ffffffffffffff",
+        traceIdBytes = "000000000000000000ffffffffffffff".hexToByteArray(),
         name = "span",
         spanKind = SpanKind.INTERNAL,
         attributes = CompatAttributesModel(),

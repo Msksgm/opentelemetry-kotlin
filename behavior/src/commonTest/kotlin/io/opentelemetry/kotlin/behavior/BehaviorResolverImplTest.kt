@@ -13,6 +13,7 @@ internal class BehaviorResolverImplTest {
         val resolved = resolver.resolve(envars = null, declarativeFile = null, dsl = null)
 
         assertEquals(OpenTelemetryBehavior(), resolved)
+        assertNull(resolved.attributeLimits)
         assertNull(resolved.tracerProvider)
         assertNull(resolved.loggerProvider)
     }
@@ -105,6 +106,21 @@ internal class BehaviorResolverImplTest {
     }
 
     @Test
+    fun dslOverridesEnvarsForAttributeLimits() {
+        val resolved = resolver.resolve(
+            envars = configWithAttributeLimits(
+                AttributeLimitsBehavior(attributeCountLimit = 5, attributeValueLengthLimit = 6),
+            ),
+            declarativeFile = null,
+            dsl = configWithAttributeLimits(AttributeLimitsBehavior(attributeCountLimit = 50)),
+        )
+
+        val limits = resolved.attributeLimits
+        assertEquals(50, limits?.attributeCountLimit)
+        assertEquals(6, limits?.attributeValueLengthLimit)
+    }
+
+    @Test
     fun dslOverridesEnvarsForLogLimits() {
         val resolved = resolver.resolve(
             envars = configWithLogLimits(
@@ -127,6 +143,9 @@ internal class BehaviorResolverImplTest {
 
     private fun configWithSpanLimits(spanLimits: SpanLimitsBehavior) =
         OpenTelemetryBehavior(tracerProvider = TracerProviderBehavior(spanLimits = spanLimits))
+
+    private fun configWithAttributeLimits(attributeLimits: AttributeLimitsBehavior) =
+        OpenTelemetryBehavior(attributeLimits = attributeLimits)
 
     private fun configWithLogLimits(logLimits: LogLimitsBehavior) =
         OpenTelemetryBehavior(loggerProvider = LoggerProviderBehavior(logLimits = logLimits))

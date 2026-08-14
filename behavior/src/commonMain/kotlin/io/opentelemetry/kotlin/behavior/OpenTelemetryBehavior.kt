@@ -9,11 +9,13 @@ import io.opentelemetry.kotlin.ExperimentalApi
  */
 @ExperimentalApi
 data class OpenTelemetryBehavior(
+    val attributeLimits: AttributeLimitsBehavior? = null,
     val tracerProvider: TracerProviderBehavior? = null,
     val loggerProvider: LoggerProviderBehavior? = null,
 ) : Behavior<OpenTelemetryBehavior> {
 
     override fun mergeWith(higher: OpenTelemetryBehavior): OpenTelemetryBehavior = copy(
+        attributeLimits = mergeNode(attributeLimits, higher.attributeLimits),
         tracerProvider = mergeNode(tracerProvider, higher.tracerProvider),
         loggerProvider = mergeNode(loggerProvider, higher.loggerProvider),
     )

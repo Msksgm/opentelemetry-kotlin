@@ -1,5 +1,6 @@
 package io.opentelemetry.kotlin.config.yaml
 
+import io.opentelemetry.kotlin.config.schema.model.AttributeLimits
 import io.opentelemetry.kotlin.config.schema.model.AttributeNameValue
 import io.opentelemetry.kotlin.config.schema.model.AttributeType
 import io.opentelemetry.kotlin.config.schema.model.LogRecordLimits
@@ -43,6 +44,10 @@ internal class OpenTelemetryConfigurationParserTest {
                 schemaUrl = "https://opentelemetry.io/schemas/1.37.0",
                 attributesList = "service.namespace=demo,service.version=1.0.0",
             ),
+            attributeLimits = AttributeLimits(
+                attributeValueLengthLimit = 4096,
+                attributeCountLimit = 128,
+            ),
             loggerProvider = LoggerProvider(
                 processors = emptyList(),
                 limits = LogRecordLimits(
@@ -57,6 +62,17 @@ internal class OpenTelemetryConfigurationParserTest {
         )
 
         assertEquals(expected, parser.parse(loadTestFixture(GOLDEN_FILE)))
+    }
+
+    @Test
+    fun attributeLimitFieldsMayBeOmitted() {
+        val yaml = "$MINIMAL_DOCUMENT\nattribute_limits: {}"
+
+        val limits = parser.parse(yaml).attributeLimits
+
+        assertEquals(AttributeLimits(), limits)
+        assertNull(limits?.attributeCountLimit)
+        assertNull(limits?.attributeValueLengthLimit)
     }
 
     @Test

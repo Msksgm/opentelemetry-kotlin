@@ -4,15 +4,20 @@ import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.ThreadSafe
 import io.opentelemetry.kotlin.aliases.OtelJavaMeterProvider
+import io.opentelemetry.kotlin.aliases.OtelJavaSdkMeterProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.awaitOperationResultCode
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ThreadSafe
 @ExperimentalApi
 internal class MeterProviderAdapter(
-    private val impl: OtelJavaMeterProvider
-) : MeterProvider {
+    private val impl: OtelJavaMeterProvider,
+    private val sdkProvider: OtelJavaSdkMeterProvider? = impl as? OtelJavaSdkMeterProvider,
+) : MeterProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, MeterAdapter>()
 
@@ -29,4 +34,14 @@ internal class MeterProviderAdapter(
             MeterAdapter(builder.build())
         }
     }
+
+    override suspend fun forceFlush(): OperationResultCode =
+        sdkProvider?.let {
+            awaitOperationResultCode(action = it::forceFlush)
+        } ?: OperationResultCode.Success
+
+    override suspend fun shutdown(): OperationResultCode =
+        sdkProvider?.let {
+            awaitOperationResultCode(action = it::shutdown)
+        } ?: OperationResultCode.Success
 }

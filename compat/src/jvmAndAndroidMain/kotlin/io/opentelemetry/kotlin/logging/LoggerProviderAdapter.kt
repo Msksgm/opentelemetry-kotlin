@@ -3,12 +3,19 @@ package io.opentelemetry.kotlin.logging
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
 import io.opentelemetry.kotlin.aliases.OtelJavaLoggerProvider
+import io.opentelemetry.kotlin.aliases.OtelJavaSdkLoggerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.awaitOperationResultCode
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
 
 @ExperimentalApi
-internal class LoggerProviderAdapter(private val impl: OtelJavaLoggerProvider) : LoggerProvider {
+internal class LoggerProviderAdapter(
+    private val impl: OtelJavaLoggerProvider,
+    private val sdkProvider: OtelJavaSdkLoggerProvider? = impl as? OtelJavaSdkLoggerProvider,
+) : LoggerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, LoggerAdapter>()
 
@@ -30,4 +37,14 @@ internal class LoggerProviderAdapter(private val impl: OtelJavaLoggerProvider) :
             LoggerAdapter(builder.build())
         }
     }
+
+    override suspend fun forceFlush(): OperationResultCode =
+        sdkProvider?.let {
+            awaitOperationResultCode(action = it::forceFlush)
+        } ?: OperationResultCode.Success
+
+    override suspend fun shutdown(): OperationResultCode =
+        sdkProvider?.let {
+            awaitOperationResultCode(action = it::shutdown)
+        } ?: OperationResultCode.Success
 }

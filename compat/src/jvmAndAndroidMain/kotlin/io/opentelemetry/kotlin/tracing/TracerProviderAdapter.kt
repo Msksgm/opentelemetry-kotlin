@@ -3,8 +3,12 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.InstrumentationScopeInfo
+import io.opentelemetry.kotlin.aliases.OtelJavaSdkTracerProvider
 import io.opentelemetry.kotlin.aliases.OtelJavaTracerProvider
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.awaitOperationResultCode
+import io.opentelemetry.kotlin.export.OperationResultCode
+import io.opentelemetry.kotlin.export.TelemetryCloseable
 import io.opentelemetry.kotlin.init.CompatSpanLimitsConfig
 import io.opentelemetry.kotlin.scope.scopeCacheKey
 import java.util.concurrent.ConcurrentHashMap
@@ -14,7 +18,8 @@ internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
     private val clock: Clock,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
-) : TracerProvider {
+    private val sdkProvider: OtelJavaSdkTracerProvider? = tracerProvider as? OtelJavaSdkTracerProvider,
+) : TracerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
 
@@ -33,4 +38,14 @@ internal class TracerProviderAdapter(
             TracerAdapter(tracer, clock, spanLimitsConfig)
         }
     }
+
+    override suspend fun forceFlush(): OperationResultCode =
+        sdkProvider?.let {
+            awaitOperationResultCode(action = it::forceFlush)
+        } ?: OperationResultCode.Success
+
+    override suspend fun shutdown(): OperationResultCode =
+        sdkProvider?.let {
+            awaitOperationResultCode(action = it::shutdown)
+        } ?: OperationResultCode.Success
 }

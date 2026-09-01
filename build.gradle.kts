@@ -24,7 +24,15 @@ plugins.withType<YarnPlugin> {
 group = "io.opentelemetry.kotlin"
 version = project.version
 
-if (project.hasProperty("snapshotPublish")) {
+val publishingToMavenLocal = gradle.startParameter.taskNames.any {
+    it.substringAfterLast(':') == "publishToMavenLocal"
+}
+val snapshotPublish = project.findProperty("snapshotPublish")
+    ?.toString()
+    ?.toBoolean()
+    ?: publishingToMavenLocal
+
+if (snapshotPublish) {
     allprojects {
         version = "${version}-SNAPSHOT"
     }

@@ -18,7 +18,6 @@ internal class TracerProviderAdapter(
     private val tracerProvider: OtelJavaTracerProvider,
     private val clock: Clock,
     private val spanLimitsConfig: CompatSpanLimitsConfig,
-    private val sdkProvider: OtelJavaSdkTracerProvider? = tracerProvider as? OtelJavaSdkTracerProvider,
 ) : TracerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, TracerAdapter>()
@@ -39,13 +38,13 @@ internal class TracerProviderAdapter(
         }
     }
 
-    override suspend fun forceFlush(): OperationResultCode =
-        sdkProvider?.let {
-            awaitOperationResultCode(action = it::forceFlush)
-        } ?: OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = when (tracerProvider) {
+        is OtelJavaSdkTracerProvider -> awaitOperationResultCode { tracerProvider.forceFlush() }
+        else -> OperationResultCode.Success
+    }
 
-    override suspend fun shutdown(): OperationResultCode =
-        sdkProvider?.let {
-            awaitOperationResultCode(action = it::shutdown)
-        } ?: OperationResultCode.Success
+    override suspend fun shutdown(): OperationResultCode = when (tracerProvider) {
+        is OtelJavaSdkTracerProvider -> awaitOperationResultCode { tracerProvider.shutdown() }
+        else -> OperationResultCode.Success
+    }
 }

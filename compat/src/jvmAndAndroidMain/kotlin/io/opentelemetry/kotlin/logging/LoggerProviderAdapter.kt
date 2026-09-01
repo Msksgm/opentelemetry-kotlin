@@ -14,7 +14,6 @@ import java.util.concurrent.ConcurrentHashMap
 @ExperimentalApi
 internal class LoggerProviderAdapter(
     private val impl: OtelJavaLoggerProvider,
-    private val sdkProvider: OtelJavaSdkLoggerProvider? = impl as? OtelJavaSdkLoggerProvider,
 ) : LoggerProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, LoggerAdapter>()
@@ -38,13 +37,13 @@ internal class LoggerProviderAdapter(
         }
     }
 
-    override suspend fun forceFlush(): OperationResultCode =
-        sdkProvider?.let {
-            awaitOperationResultCode(action = it::forceFlush)
-        } ?: OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = when (impl) {
+        is OtelJavaSdkLoggerProvider -> awaitOperationResultCode { impl.forceFlush() }
+        else -> OperationResultCode.Success
+    }
 
-    override suspend fun shutdown(): OperationResultCode =
-        sdkProvider?.let {
-            awaitOperationResultCode(action = it::shutdown)
-        } ?: OperationResultCode.Success
+    override suspend fun shutdown(): OperationResultCode = when (impl) {
+        is OtelJavaSdkLoggerProvider -> awaitOperationResultCode { impl.shutdown() }
+        else -> OperationResultCode.Success
+    }
 }

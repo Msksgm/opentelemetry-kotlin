@@ -15,8 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 @ThreadSafe
 @ExperimentalApi
 internal class MeterProviderAdapter(
-    private val impl: OtelJavaMeterProvider,
-    private val sdkProvider: OtelJavaSdkMeterProvider? = impl as? OtelJavaSdkMeterProvider,
+    private val impl: OtelJavaMeterProvider
 ) : MeterProvider, TelemetryCloseable {
 
     private val map = ConcurrentHashMap<InstrumentationScopeInfo, MeterAdapter>()
@@ -35,13 +34,13 @@ internal class MeterProviderAdapter(
         }
     }
 
-    override suspend fun forceFlush(): OperationResultCode =
-        sdkProvider?.let {
-            awaitOperationResultCode(action = it::forceFlush)
-        } ?: OperationResultCode.Success
+    override suspend fun forceFlush(): OperationResultCode = when (impl) {
+        is OtelJavaSdkMeterProvider -> awaitOperationResultCode { impl.forceFlush() }
+        else -> OperationResultCode.Success
+    }
 
-    override suspend fun shutdown(): OperationResultCode =
-        sdkProvider?.let {
-            awaitOperationResultCode(action = it::shutdown)
-        } ?: OperationResultCode.Success
+    override suspend fun shutdown(): OperationResultCode = when (impl) {
+        is OtelJavaSdkMeterProvider -> awaitOperationResultCode { impl.shutdown() }
+        else -> OperationResultCode.Success
+    }
 }

@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.init
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.clock.FakeClock
 import io.opentelemetry.kotlin.createCompatOpenTelemetry
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -30,12 +31,13 @@ internal class CompatTracerProviderSamplerTest {
 
     private val idGenerator = CompatIdGenerator()
     private val noGlobalLimits = AttributeLimitsBehavior()
+    private val noSpanLimits = SpanLimitsBehavior()
 
     @Test
     fun `default sampler records and samples spans`() {
         val clock = FakeClock()
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler)
-        val provider = config.build(clock, idGenerator, globalLimits = noGlobalLimits)
+        val provider = config.build(clock, idGenerator, globalLimits = noGlobalLimits, spanLimits = noSpanLimits)
         val span = provider.getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
@@ -47,7 +49,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { alwaysOn() }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -58,7 +65,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { FakeSampler(SamplingResult.Decision.DROP) }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
     }
 
@@ -68,7 +80,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { FakeSampler(SamplingResult.Decision.RECORD_AND_SAMPLE) }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -79,7 +96,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { alwaysOff() }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -103,7 +125,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { parentBased(root = alwaysOn()) }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -114,7 +141,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { parentBased(root = alwaysOff()) }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -140,7 +172,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableAlwaysOn() } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -151,7 +188,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableAlwaysOff() } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -162,7 +204,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableProbability(1.0) } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -173,7 +220,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableProbability(0.0) } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -184,7 +236,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableParentThreshold(root = composableAlwaysOn()) } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -195,7 +252,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableParentThreshold(root = composableAlwaysOff()) } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -253,7 +315,12 @@ internal class CompatTracerProviderSamplerTest {
                 }
             }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }
@@ -270,7 +337,12 @@ internal class CompatTracerProviderSamplerTest {
                 }
             }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -281,7 +353,12 @@ internal class CompatTracerProviderSamplerTest {
         val config = CompatTracerProviderConfig(clock, NoopSdkErrorHandler).apply {
             sampler { composite { composableRuleBased { } } }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertFalse(span.isRecording())
         assertFalse(span.spanContext.traceFlags.isSampled)
     }
@@ -299,7 +376,12 @@ internal class CompatTracerProviderSamplerTest {
                 }
             }
         }
-        val span = config.build(clock, idGenerator, globalLimits = noGlobalLimits).getTracer("test").startSpan("span")
+        val span = config.build(
+            clock,
+            idGenerator,
+            globalLimits = noGlobalLimits,
+            spanLimits = noSpanLimits
+        ).getTracer("test").startSpan("span")
         assertTrue(span.isRecording())
         assertTrue(span.spanContext.traceFlags.isSampled)
     }

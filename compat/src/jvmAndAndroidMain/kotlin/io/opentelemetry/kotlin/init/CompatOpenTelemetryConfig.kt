@@ -8,6 +8,7 @@ import io.opentelemetry.kotlin.attributes.CompatAttributesModel
 import io.opentelemetry.kotlin.attributes.setTypedAttributes
 import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.behavior.OpenTelemetryBehavior
+import io.opentelemetry.kotlin.behavior.SpanLimitsBehavior
 import io.opentelemetry.kotlin.config.dsl.AttributeLimitsConfigDslImpl
 import io.opentelemetry.kotlin.error.GuardedSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
@@ -115,10 +116,16 @@ internal class CompatOpenTelemetryConfig(
     private val resolvedBehavior: OpenTelemetryBehavior by lazy {
         behaviorReader.read(
             configFilePath = configFilePath,
-            dsl = OpenTelemetryBehavior(attributeLimits = globalAttributeLimits.toBehavior()),
+            dsl = OpenTelemetryBehavior(
+                attributeLimits = globalAttributeLimits.toBehavior(),
+                tracerProvider = tracerProviderConfig.toBehavior(),
+            ),
         )
     }
 
     internal fun resolveAttributeLimits(): AttributeLimitsBehavior =
         resolvedBehavior.attributeLimits ?: AttributeLimitsBehavior()
+
+    internal fun resolveSpanLimits(): SpanLimitsBehavior =
+        resolvedBehavior.tracerProvider?.spanLimits ?: SpanLimitsBehavior()
 }

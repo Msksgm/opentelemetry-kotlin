@@ -37,11 +37,18 @@ internal class LoggerProviderImplTest {
     )
     private val contextFactory = FakeContextFactory()
     private val spanContextFactory = FakeSpanContextFactory()
+    private val attributeLimits = AttributeLimitsBehavior()
     private lateinit var impl: LoggerProviderImpl
 
     @BeforeTest
     fun setup() {
-        impl = LoggerProviderImpl(clock, loggingConfig, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            loggingConfig,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
     }
 
     @Test
@@ -59,7 +66,13 @@ internal class LoggerProviderImplTest {
             handler,
             loggerConfigurator,
         )
-        val provider = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        val provider = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         provider.getLogger(name = "")
         assertEquals(1, handler.apiMisuses.size)
         assertEquals("LoggerProvider.getLogger", handler.apiMisuses.single().api)
@@ -147,7 +160,13 @@ internal class LoggerProviderImplTest {
             NoopSdkErrorHandler,
             loggerConfigurator,
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         impl.getLogger(name = "test")
 
         val result = impl.forceFlush()
@@ -171,7 +190,13 @@ internal class LoggerProviderImplTest {
             NoopSdkErrorHandler,
             loggerConfigurator,
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         impl.getLogger(name = "test")
 
         val result = impl.shutdown()
@@ -196,7 +221,13 @@ internal class LoggerProviderImplTest {
             NoopSdkErrorHandler,
             loggerConfigurator,
         )
-        impl = LoggerProviderImpl(clock, config, contextFactory, spanContextFactory)
+        impl = LoggerProviderImpl(
+            clock,
+            config,
+            contextFactory,
+            spanContextFactory,
+            attributeLimits,
+        )
         val logger = impl.getLogger(name = "test")
         impl.shutdown()
         logger.emit(body = "should not emit")
@@ -246,6 +277,7 @@ internal class LoggerProviderImplTest {
         LoggingConfig(processor, AttributeLimitsBehavior(100, 100), FakeResource(), errorHandler, loggerConfigurator),
         contextFactory,
         spanContextFactory,
+        attributeLimits
     )
 
     private class ThrowingSdkErrorHandler : SdkErrorHandler {

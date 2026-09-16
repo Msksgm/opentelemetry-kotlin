@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.ExperimentalApi
 import io.opentelemetry.kotlin.attributes.AttributesModel
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.FakeSdkErrorHandler
 import io.opentelemetry.kotlin.error.NoopSdkErrorHandler
 import io.opentelemetry.kotlin.init.config.MetricsConfig
@@ -33,7 +34,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = NoopSdkErrorHandler,
-            )
+            ),
+            AttributeLimitsBehavior(),
         ).getMeter("test")
     }
 
@@ -101,7 +103,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior(),
         ).getMeter("test")
 
         val counter = invalidMeter.createDoubleUpDownCounter("1 invalid name")
@@ -119,7 +122,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior(),
         ).getMeter("test")
 
         val validNames = listOf(
@@ -154,7 +158,8 @@ internal class UpDownCounterImplTest {
                 MetricsConfig(
                     resource = ResourceImpl(AttributesModel(), null),
                     sdkErrorHandler = handler,
-                )
+                ),
+                AttributeLimitsBehavior(),
             ).getMeter("test")
 
             val counter = invalidMeter.createDoubleUpDownCounter(name)
@@ -172,7 +177,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior(),
         ).getMeter("test")
 
         val unit = "a".repeat(maxUnitChars + 1)
@@ -191,7 +197,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior()
         ).getMeter("test")
 
         val unit = "a".repeat(maxUnitChars)
@@ -208,7 +215,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior()
         ).getMeter("test")
 
         val counter = nonAsciiUnitMeter.createDoubleUpDownCounter("grocery.customers", unit = "café")
@@ -226,7 +234,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior()
         ).getMeter("test")
 
         val description = "a".repeat(maxDescriptionChars + 1)
@@ -243,7 +252,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior()
         ).getMeter("test")
 
         val description = "a".repeat(maxDescriptionChars)
@@ -260,7 +270,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior()
         ).getMeter("test")
 
         // U+1F600 GRINNING FACE is a surrogate pair, one code point but two UTF-16 chars.
@@ -279,7 +290,8 @@ internal class UpDownCounterImplTest {
             MetricsConfig(
                 resource = ResourceImpl(AttributesModel(), null),
                 sdkErrorHandler = handler,
-            )
+            ),
+            AttributeLimitsBehavior()
         ).getMeter("test")
 
         val emoji = "\uD83D\uDE00"

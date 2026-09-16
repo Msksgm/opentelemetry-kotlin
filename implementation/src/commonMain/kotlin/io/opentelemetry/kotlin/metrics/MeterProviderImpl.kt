@@ -2,6 +2,7 @@ package io.opentelemetry.kotlin.metrics
 
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -18,6 +19,7 @@ import io.opentelemetry.kotlin.provider.ApiProviderImpl
 
 internal class MeterProviderImpl(
     metricsConfig: MetricsConfig,
+    private val attributeLimits: AttributeLimitsBehavior,
 ) : MeterProvider, TelemetryCloseable {
 
     private val sdkErrorHandler = metricsConfig.sdkErrorHandler
@@ -52,7 +54,13 @@ internal class MeterProviderImpl(
                         )
                     )
                 }
-                val key = apiProvider.createInstrumentationScopeInfo(name, version, schemaUrl, attributes)
+                val key = apiProvider.createInstrumentationScopeInfo(
+                    name,
+                    version,
+                    schemaUrl,
+                    attributes,
+                    attributeLimits
+                )
                 apiProvider.getOrCreate(key)
             }
         }

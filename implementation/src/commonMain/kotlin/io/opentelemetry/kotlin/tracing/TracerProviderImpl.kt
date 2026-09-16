@@ -3,6 +3,7 @@ package io.opentelemetry.kotlin.tracing
 import io.opentelemetry.kotlin.Clock
 import io.opentelemetry.kotlin.NoopOpenTelemetry
 import io.opentelemetry.kotlin.attributes.AttributesMutator
+import io.opentelemetry.kotlin.behavior.AttributeLimitsBehavior
 import io.opentelemetry.kotlin.error.SdkError
 import io.opentelemetry.kotlin.error.SdkErrorSeverity
 import io.opentelemetry.kotlin.error.guardOrDefault
@@ -30,6 +31,7 @@ internal class TracerProviderImpl(
     traceFlagsFactory: TraceFlagsFactory,
     spanFactory: SpanFactory,
     private val idGenerator: IdGenerator,
+    private val attributeLimits: AttributeLimitsBehavior,
 ) : TracerProvider, TelemetryCloseable {
 
     private val sdkErrorHandler = tracingConfig.sdkErrorHandler
@@ -85,7 +87,8 @@ internal class TracerProviderImpl(
                     name = name,
                     version = version,
                     schemaUrl = schemaUrl,
-                    attributes = attributes
+                    attributes = attributes,
+                    attributeLimits = attributeLimits,
                 )
                 apiProvider.getOrCreate(key)
             }
